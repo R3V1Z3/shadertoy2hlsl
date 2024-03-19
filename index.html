@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShaderToy to ZGameEditor Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a class="github-fork-ribbon right-top" href="https://github.com/R3V1Z3/shadertoy2hlsl" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+    <div id="container">
+        <div id="titlebar">
+            <h1>Shadertoy2ZGE</h1>
+        </div>
+        <div id="content">
+            <p>Convert Shadertoy shaders into Windows Terminal compatible HLSL shaders.</p>
+            <textarea id="inputCode" placeholder="Paste your ShaderToy code here..."></textarea>
+            <button id="convertButton">Convert ⭆</button>
+            <textarea id="outputCode" placeholder="Converted code will appear here..." readonly></textarea>
+            <div id="notification" class="hidden">Operation completed!</div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
