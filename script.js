@@ -2,31 +2,28 @@ document.getElementById('convertButton').addEventListener('click', async functio
     const inputCode = document.getElementById('inputCode').value;
     let title = "HLSLShader";
     let author = "Shader author";
-    const ZGEvars = [];
-    let outputCode = inputCode.replaceAll('texture(', 'texture2D(');
-    // Fill vars variable array
-    const regex = /float ZGE(\w+)\s*=\s*([^;]+);(?:\s*\/\/\s*Range:\s*(-?[0-9]+\.?[0-9]*),\s*(-?[0-9]+\.?[0-9]*))?/g;
-    let matches;
-    let varString = "";
-    while ((matches = regex.exec(outputCode)) !== null) {
-        // Extracting the range values if they are present
-        let rangeFrom = matches[3] ? matches[3].trim() : undefined;
-        let rangeTo = matches[4] ? matches[4].trim() : undefined;
-        varString += "uniform float ZGE" + matches[1] + ';\n';
-        ZGEvars.push({
-            id: matches[1],
-            value: matches[2].trim(),
-            rangeFrom: rangeFrom,
-            rangeTo: rangeTo,
-        });
+    let outputCode = inputCode.replaceAll('texture(iChannel0,', 'ShaderTexture.Sample(Sampler,');
+    outputCode = inputCode.replaceAll('vec2', 'float2');
+    outputCode = inputCode.replaceAll('vec3', 'float3');
+    outputCode = inputCode.replaceAll('vec4', 'float4');
+    outputCode = inputCode.replaceAll('mix(', 'lerp(');
+    // remove mainImage() declrataion
+    const regex = /void mainImage.*?\{/gs;
+    outputCode = outputCode.replace(regex, '');
+    // remove final } of mainImage()
+    const lastIndex = outputCode.lastIndexOf('}');
+    if (lastIndex !== -1) {
+        outputCode = outputCode.substring(0, lastIndex) + outputCode.substring(lastIndex + 1);
     }
+
     // Get shader name and author from provided code
     var lines = outputCode.split('\n');
-    outputCode = varString;
+    var newCode = "";
     lines.forEach(function(line, i, object) {
-        // we don't want to re-add these lines if author and title are found
-        // as they're added to the project file
         let reAdd = true;
+        if (line.includes('void mainImage')) {
+            reAdd = false;
+        }
         if (line.includes("//")) {
             // Convert line to lowercase for case-insensitive search
             var lcase = line.toLowerCase();
@@ -41,11 +38,10 @@ document.getElementById('convertButton').addEventListener('click', async functio
                 reAdd = false;
             }
         }
-        // we've already filled the ZGEvars array so lets now remove the lines from the code
-        // since they'll be added as uniforms
-        if (line.includes("float ZGE")) reAdd = false;
-        if (reAdd) outputCode += line + '\n';
+        if (reAdd) newCode += line + "\n";
     });
+    // TODO: remove {} opening and trailing braces from mainImage()
+    outputCode = newCode;
 
     // Splice user code into template
     try {
@@ -86,14 +82,14 @@ document.getElementById('convertButton').addEventListener('click', async functio
         // Create download button
         downloadButton = document.createElement('button');
         downloadButton.id = 'downloadButton';
-        downloadButton.textContent = '⇩ Download ZGE Project';
+        downloadButton.textContent = '⇩ Download HLSL File';
         document.querySelector('#content').appendChild(downloadButton);
     }
     
     // Set the download link with the converted code
     const dataUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(outputCode);
     downloadButton.setAttribute('href', dataUri);
-    downloadButton.setAttribute('download', author + ' ' + title + '.zgeproj');
+    downloadButton.setAttribute('download', author + ' ' + title + '.hlsl');
     copyButton.onclick = function() {
         navigator.clipboard.writeText(outputCode);
         alert("Copied");
