@@ -9,6 +9,8 @@ cbuffer PixelShaderSettings
     float4 Background;
 };
 
+// Shadertoy initial.
+
 float4 main(float4 fragCoord : SV_POSITION, float2 hlsluv : TEXCOORD) : SV_TARGET
 {
     float iTime = Time;
